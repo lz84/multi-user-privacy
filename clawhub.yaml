@@ -1,0 +1,77 @@
+# ClawHub 技能配置文件
+
+name: multi-user-privacy
+version: 0.5.0
+description: 多用户隐私保护系统 - 为 OpenClaw 提供企业级多用户隔离、权限控制和实时监控能力
+
+author:
+  name: 老刘
+  contact: ou_b96f5424607baf3a0455b55e0f4a2213
+
+category: Security & Privacy
+tags:
+  - privacy
+  - security
+  - multi-user
+  - permission
+  - isolation
+  - enterprise
+
+pricing:
+  model: freemium
+  plans:
+    - name: Free
+      price: 0
+      maxUsers: 3
+      features:
+        - 基础身份识别
+        - 记忆隔离
+        - 隐私检查
+        - 基础日志
+        - 最多支持 3 个用户
+    - name: Pro
+      price: 9.9
+      period: monthly
+      maxUsers: 10
+      features:
+        - 所有 Free 功能
+        - 项目权限管理
+        - 异常行为检测
+        - 实时告警
+        - 配置热更新
+        - 最多支持 10 个用户
+    - name: Enterprise
+      price: 49.9
+      period: monthly
+      maxUsers: unlimited
+      features:
+        - 所有 Pro 功能
+        - 性能优化（缓存）
+        - 行为数据库
+        - 优先支持
+        - 自定义配置
+        - 无限用户数
+
+requirements:
+  - nodejs >= 14.0.0
+  - openclaw >= 1.0.0
+
+files:
+  include:
+    - privacy-guard.js
+    - scripts/
+    - SKILL.md
+    - README.md
+    - package.json
+  exclude:
+    - node_modules/
+    - "*.log"
+    - "*.json"
+
+scripts:
+  post-install: node scripts/init.js
+
+license: MIT
+repository: https://github.com/your-repo/multi-user-privacy
+homepage: https://github.com/your-repo/multi-user-privacy#readme
+bugs: https://github.com/your-repo/multi-user-privacy/issues

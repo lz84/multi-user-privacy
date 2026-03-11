@@ -1,0 +1,55 @@
+# 依赖
+node_modules/
+package-lock.json
+
+# 日志
+*.log
+logs/
+
+# 数据库
+*.db
+*.sqlite
+*.sqlite3
+
+# 配置文件（敏感信息）
+.privacy-config.json
+.projects-config.json
+.user-context.json
+.router-db.json
+.session-db.json
+behavior-db.json
+privacy-alerts.json
+
+# 凭证
+credentials/
+.env
+.env.local
+
+# 缓存
+.cache/
+*.cache
+
+# 临时文件
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# 系统文件
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# 测试
+coverage/
+.nyc_output/
+
+# 构建
+dist/
+build/
