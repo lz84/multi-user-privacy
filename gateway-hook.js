@@ -103,48 +103,24 @@ function processPendingQueue() {
             return [];
         }
         
-        log('INFO', '处理 pending 队列', { count: pending.length });
+        log('INFO', 'Pending 队列状态检查', { count: pending.length });
+        log('INFO', '⚠️  注意：子代理创建由 Gateway 主流程处理，此函数仅记录状态');
         
-        const completed = [];
-        const remaining = [];
+        // 仅记录 pending 队列状态，不实际创建
+        // 实际创建应该由 Gateway 在收到消息时调用 sessions_spawn API
+        const pendingList = pending.map(s => ({
+            userId: s.userId,
+            userName: s.userName,
+            status: s.status,
+            label: s.label
+        }));
         
-        for (const session of pending) {
-            if (session.status === 'created') {
-                remaining.push(session);
-                continue;
-            }
-            
-            try {
-                // 调用 sessions_spawn 创建子代理
-                const cmd = `openclaw sessions spawn --task="${session.task}" --label="${session.label}" --runtime="subagent" --mode="session"`;
-                log('INFO', '创建子代理', { userId: session.userId, cmd });
-                
-                const result = execSync(cmd, { encoding: 'utf-8', timeout: 30000 });
-                log('INFO', '子代理创建成功', { userId: session.userId, result });
-                
-                session.status = 'created';
-                session.actualSessionKey = result.trim();
-                session.createdAt = new Date().toISOString();
-                completed.push(session);
-                
-            } catch (e) {
-                log('ERROR', '子代理创建失败', { userId: session.userId, error: e.message });
-                session.lastError = e.message;
-                remaining.push(session);
-            }
-        }
+        log('INFO', 'Pending 队列详情', { sessions: pendingList });
         
-        // 保存更新后的队列
-        fs.writeFileSync(PENDING_FILE, JSON.stringify(remaining, null, 2), 'utf-8');
-        
-        if (completed.length > 0) {
-            log('INFO', 'Pending 队列处理完成', { completed: completed.length, remaining: remaining.length });
-        }
-        
-        return completed;
+        return pending;
         
     } catch (e) {
-        log('ERROR', '处理 pending 队列失败', { error: e.message });
+        log('ERROR', '检查 pending 队列失败', { error: e.message });
         return [];
     }
 }

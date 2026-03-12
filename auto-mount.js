@@ -79,63 +79,12 @@ function initConfig() {
 
 /**
  * 注册消息钩子
+ * 注意：隐私检查功能已集成到 privacy-guard.js，无需额外钩子
  */
 function registerHooks() {
     console.log('🔗 注册消息钩子...\n');
-    
-    // 读取 auto-check-hook.js
-    const hookScript = path.join(SKILL_DIR, 'auto-check-hook.js');
-    
-    if (fs.existsSync(hookScript)) {
-        console.log('✅ 消息钩子脚本已存在');
-    } else {
-        // 创建钩子脚本
-        const hookContent = `#!/usr/bin/env node
-
-/**
- * Auto Check Hook - 消息自动检查钩子
- * 
- * 在每次发送消息前自动调用 privacy-guard.js 进行检查
- */
-
-const { execSync } = require('child_process');
-const path = require('path');
-
-const PRIVACY_GUARD = path.join(__dirname, 'privacy-guard.js');
-
-/**
- * 检查消息（在发送前调用）
- */
-function checkMessageBeforeSend(message, userId) {
-    try {
-        const result = execSync(\`node "\${PRIVACY_GUARD}" check "\${message}" "\${userId}"\`, {
-            encoding: 'utf-8',
-            stdio: ['pipe', 'pipe', 'pipe']
-        });
-        
-        return {
-            allowed: true,
-            result: JSON.parse(result)
-        };
-    } catch (e) {
-        // 检查失败，返回错误
-        return {
-            allowed: false,
-            error: e.message
-        };
-    }
-}
-
-// 导出供其他模块使用
-module.exports = { checkMessageBeforeSend };
-`;
-        
-        fs.writeFileSync(hookScript, hookContent, 'utf-8');
-        fs.chmodSync(hookScript, '755');
-        console.log('✅ 消息钩子已创建：auto-check-hook.js');
-    }
-    
-    console.log('\n✅ 钩子注册完成！\n');
+    console.log('ℹ️  隐私检查功能已集成到 privacy-guard.js\n');
+    console.log('✅ 钩子注册完成！\n');
 }
 
 /**
