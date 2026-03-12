@@ -1,297 +1,448 @@
-# Multi-User Privacy
+# Multi-User Privacy Skill
 
-> **为 OpenClaw 打造的企业级多用户隐私保护系统**
-> 
-> 完全免费 · 开源 · 生产就绪
+> **版本**: v0.9.0  
+> **作者**: 狗子 🐶  
+> **最后更新**: 2026-03-12  
+> **GitHub**: https://github.com/lz84/multi-user-privacy
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![OpenClaw](https://img.shields.io/badge/OpenClaw-Skill-00b0aa)](https://openclaw.ai)
-[![Version](https://img.shields.io/badge/version-0.8.0-blue)](https://github.com/your-username/multi-user-privacy/releases)
-[![Stars](https://img.shields.io/github/stars/your-username/multi-user-privacy?style=social)](https://github.com/your-username/multi-user-privacy/stargazers)
+用 Markdown 写公众号文章，像发朋友圈一样简单
 
 ---
 
-## 🌟 特性
+## 🌟 核心功能
 
-### 🔒 完全隔离
+### 1. 多用户隐私保护
+- ✅ 自动身份识别（管理员/普通用户）
+- ✅ 记忆隔离（每个用户独立记忆空间）
+- ✅ 敏感词检查（词库独立配置）
+- ✅ 隐私检查（回复前自动检查）
 
-- ✅ **身份识别** - 自动识别管理员/普通用户
-- ✅ **记忆隔离** - 每个用户独立记忆空间
-- ✅ **隐私检查** - 回复前敏感词自动过滤
-- ✅ **Session 管理** - 用户专属 session 记录
-- ✅ **子代理路由** - 自动路由到专属子代理
+### 2. 子代理路由系统
+- ✅ Gateway 自动创建子代理
+- ✅ 消息自动路由到对应子代理
+- ✅ Pending 队列机制
+- ✅ 路由器数据库
 
-### ⚡ 高性能
+### 3. 配额管理系统
+- ✅ 按用户类型设置配额（VIP/普通/管理员）
+- ✅ 配额继承（组配额）
+- ✅ 配额借用（临时增加）
+- ✅ 配额报表（导出 CSV）
+- ✅ CLI 管理工具
 
-- ✅ **配置缓存** - 100 倍性能提升
-- ✅ **行为数据库** - 完整操作记录
-- ✅ **自动清理** - 过期缓存自动清除
+### 4. 监控告警系统
+- ✅ 子代理运行状态监控
+- ✅ 配额使用情况监控
+- ✅ 飞书消息告警
+- ✅ 告警阈值配置
 
-### 🛡️ 企业级安全
+### 5. Web 管理界面
+- ✅ 查看子代理状态
+- ✅ 调整用户配额
+- ✅ 查看使用统计
+- ✅ 操作日志
 
-- ✅ **项目权限** - 防止越权操作
-- ✅ **异常检测** - 频繁失败自动封禁
-- ✅ **实时告警** - 隐私违规立即通知
-- ✅ **配置热更新** - 修改配置无需重启
+### 6. Session 持久化
+- ✅ 保存 Session 状态到磁盘
+- ✅ 重启后自动恢复
+- ✅ 状态迁移（活跃→休眠→归档）
 
-### 📊 完整日志
+### 7. Session 模板
+- ✅ 管理员模板（高配额、完整权限）
+- ✅ 普通用户模板（标准配额）
+- ✅ 访客模板（低配额、只读）
+- ✅ 自定义模板支持
 
-- ✅ **JSON 格式** - 方便分析
-- ✅ **行为审计** - 完整操作记录
-- ✅ **可视化工具** - 清晰的统计报表
+### 8. 自动扩缩容
+- ✅ 监控 Session 负载
+- ✅ 自动创建新 Session（负载高时）
+- ✅ 自动合并 Session（负载低时）
+- ✅ 负载均衡
 
 ---
 
 ## 🚀 快速开始
 
-### 安装
+### 1. 安装技能
 
 ```bash
-# 通过 ClawHub 安装（推荐）
 npx clawhub install multi-user-privacy
-
-# 或手动安装
-git clone https://github.com/your-username/multi-user-privacy.git
-cp -r multi-user-privacy ~/.openclaw/skills/
 ```
 
-### 配置
+安装位置：`~/.openclaw/skills/multi-user-privacy/`
 
-**1. 创建隐私配置文件**
+### 2. 查看敏感词词库
 
 ```bash
-cat > ~/.openclaw/workspace/.privacy-config.json << 'EOF'
-{
-  "admin": {
-    "id": "your_admin_id",
-    "name": "管理员",
-    "role": "admin"
-  },
-  "privacy": {
-    "mode": "strict",
-    "forbiddenTerms": ["敏感词 1", "敏感词 2"]
-  }
-}
-EOF
+cd ~/.openclaw/skills/multi-user-privacy
+node sensitive-word-loader.js list
 ```
 
-**2. 创建项目配置文件**
+### 3. 启动监控
 
 ```bash
-cat > ~/.openclaw/workspace/.projects-config.json << 'EOF'
-{
-  "projects": {
-    "your-project": {
-      "name": "你的项目",
-      "owner": "your_user_id",
-      "collaborators": ["collab_id_1", "collab_id_2"]
-    }
-  }
-}
-EOF
+cd monitoring
+./start.sh start
 ```
 
-**3. 启用自动注入**
-
-在 OpenClaw 主入口添加：
-
-```javascript
-// ~/.openclaw/runtime/main.js 开头
-require('./skills/multi-user-privacy/scripts/auto-inject');
-```
-
-### 使用
+### 4. 启动 Web 管理界面
 
 ```bash
-# 查看 Session 统计
-node scripts/session-guard.js stats
+cd web-admin
+node server.js
+# 访问 http://localhost:3456
+```
 
-# 查看日志
-node scripts/view-logs.js
+### 5. 管理配额
 
-# 查看子代理路由
-node scripts/subagent-router.js list
+```bash
+# Node.js CLI
+node scripts/quota-manager.js list
 
-# 清空 Session 数据库
-node scripts/session-guard.js clear
+# Python 高级功能
+python3 quota-manager/quota_manager.py -a check -u user_001
 ```
 
 ---
 
-## 📖 文档
+## 📁 目录结构
 
-| 文档 | 说明 |
-|------|------|
-| [SKILL.md](SKILL.md) | 技能完整说明 |
-| [VIP-AGENT-SETUP.md](docs/VIP-AGENT-SETUP.md) | VIP Agent 配置指南 |
-| [PRICING-STRATEGY.md](docs/PRICING-STRATEGY.md) | 商业化方案（参考） |
-| [CHANGELOG.md](CHANGELOG.md) | 更新日志 |
+```
+multi-user-privacy/
+├── 核心模块
+│   ├── privacy-guard.js              # 隐私检查器（核心）
+│   ├── gateway-hook.js               # Gateway 集成
+│   ├── sensitive-word-loader.js      # 敏感词词库加载器
+│   ├── sensitive-word-manager.js     # 敏感词管理工具
+│   └── sensitive-words.txt           # 敏感词词库（用户可编辑）
+│
+├── 子代理管理
+│   ├── subagent-integration.js       # 子代理集成
+│   ├── auto-mount.js                 # 自动挂载脚本
+│   ├── auto-create-subagents.sh      # 自动创建脚本
+│   └── .router-db.json               # 路由器数据库
+│
+├── 配额管理
+│   ├── quota-manager/
+│   │   ├── quota_manager.py          # Python 配额管理器
+│   │   └── test_quota_manager.py     # Python 测试套件
+│   ├── scripts/
+│   │   └── quota-manager.js          # Node.js 配额管理 CLI
+│   └── .quota-db.json                # 配额数据库
+│
+├── 监控系统
+│   ├── monitoring/
+│   │   ├── monitor.js                # 监控核心
+│   │   ├── alert-config.json         # 告警配置
+│   │   ├── install.sh                # 安装脚本
+│   │   └── start.sh                  # 启动脚本
+│   └── gateway-watchdog/
+│       └── gateway-watchdog.js       # Gateway 监控守护
+│
+├── Web 管理界面
+│   └── web-admin/
+│       ├── server.js                 # 后端服务器
+│       ├── index.html                # 前端界面
+│       └── scripts/
+│           ├── start.sh              # 启动脚本
+│           └── test.js               # 测试脚本
+│
+├── Session 管理
+│   ├── session-persistence/
+│   │   ├── session-manager.js        # Session 管理器
+│   │   ├── session-templates.js      # Session 模板
+│   │   └── test-session-persistence.js # 测试套件
+│   └── config/session-templates/
+│       └── templates-config.json     # 模板配置
+│
+├── 自动扩缩容
+│   └── auto-scaling/
+│       ├── session-autoscaler.js     # 核心模块
+│       ├── autoscaler-config.json    # 配置文件
+│       ├── start-autoscaler.js       # 服务管理脚本
+│       └── README.md                 # 使用文档
+│
+├── 文档
+│   ├── docs/
+│   │   ├── SENSITIVE_WORDS_GUIDE.md  # 敏感词使用指南
+│   │   ├── 高级配额管理系统.md        # 高级配额文档
+│   │   ├── session-templates.md      # Session 模板文档
+│   │   └── PROJECT_SUMMARY.md        # 项目总结
+│   ├── README.md                     # 本文件
+│   ├── STRUCTURE.md                  # 目录结构说明
+│   └── SKILL.md                      # 技能定义
+│
+└── 配置
+    ├── .multi-user-config.json       # 多用户配置
+    ├── .user-context.json            # 用户上下文
+    ├── .router-db.json               # 路由器数据库
+    └── .quota-db.json                # 配额数据库
+```
+
+---
+
+## 🔧 配置说明
+
+### 敏感词词库
+
+**位置**: `sensitive-words.txt`
+
+**格式**:
+```
+# 类型 | 模式 | 动作 | 说明
+regex|/ou_[a-f0-9]{32}/g|block|飞书账号 ID 检测
+keyword|管理员|alert|管理员角色提及
+```
+
+**管理命令**:
+```bash
+# 列出所有规则
+node sensitive-word-loader.js list
+
+# 添加规则
+node sensitive-word-loader.js add regex "/test/g" block "测试规则"
+
+# 测试文本
+node sensitive-word-loader.js test "这是测试文本"
+
+# 重新加载
+node sensitive-word-loader.js reload
+```
+
+### 配额配置
+
+**位置**: `.quota-db.json`
+
+**格式**:
+```json
+{
+  "ou_b96f5424607baf3a0455b55e0f4a2213": {
+    "diskQuotaMB": -1,
+    "tokenQuota": -1,
+    "messageQuota": -1,
+    "maxConcurrentSessions": -1,
+    "isAdmin": true
+  },
+  "default": {
+    "diskQuotaMB": 100,
+    "tokenQuota": 100000,
+    "messageQuota": 1000,
+    "maxConcurrentSessions": 5,
+    "isAdmin": false
+  }
+}
+```
+
+**管理命令**:
+```bash
+# 查看配额
+node scripts/quota-manager.js list
+
+# 设置用户配额
+node scripts/quota-manager.js set ou_xxx123 --disk=100 --token=100000 --message=1000
+
+# 重置配额
+node scripts/quota-manager.js reset ou_xxx123
+```
+
+### 路由器数据库
+
+**位置**: `.router-db.json`
+
+**格式**:
+```json
+{
+  "ou_b96f5424607baf3a0455b55e0f4a2213": {
+    "userId": "ou_b96f5424607baf3a0455b55e0f4a2213",
+    "userName": "老刘",
+    "sessionKey": "7783c42e-e974-490a-9609-607327c4509f",
+    "memoryPath": "/memory/sessions/7783c42e-e974-490a-9609-607327c4509f/user.md",
+    "status": "active"
+  }
+}
+```
+
+---
+
+## 📊 监控告警
+
+### 启动监控
+
+```bash
+cd monitoring
+./start.sh start
+```
+
+### 查看状态
+
+```bash
+./start.sh status
+```
+
+### 查看日志
+
+```bash
+./start.sh log
+```
+
+### 告警配置
+
+**位置**: `monitoring/alert-config.json`
+
+**配置项**:
+- 检查间隔：60 秒
+- 子代理最大并发数：10
+- 子代理最大运行时间：2 小时
+- Token/消息/磁盘配额预警阈值：80%
+- Gateway 连续失败阈值：3 次
+
+---
+
+## 🌐 Web 管理界面
+
+### 启动
+
+```bash
+cd web-admin
+node server.js
+```
+
+### 访问
+
+http://localhost:3456
+
+### 功能
+
+- 查看所有子代理状态
+- 调整用户配额
+- 查看使用统计
+- 操作日志
+
+---
+
+## 🧪 测试
+
+### 运行测试
+
+```bash
+# 敏感词测试
+node sensitive-word-loader.js test "测试文本"
+
+# 配额测试
+node scripts/test-quota.js
+
+# Session 持久化测试
+node session-persistence/test-session-persistence.js
+
+# 自动创建测试
+node test-auto-create.js
+```
+
+---
+
+## 📚 文档
+
+### 完整文档
+
+- `STRUCTURE.md` - 目录结构说明
+- `SKILL.md` - 技能定义
+- `docs/SENSITIVE_WORDS_GUIDE.md` - 敏感词使用指南
+- `docs/高级配额管理系统.md` - 高级配额文档
+- `docs/session-templates.md` - Session 模板文档
+- `docs/PROJECT_SUMMARY.md` - 项目总结
+
+### 快速参考
+
+- `QUICK_START.md` - 快速入门
+- `README_COMPLETE.md` - 完整功能文档
 
 ---
 
 ## 🎯 使用场景
 
-### 场景 1：多用户 OpenClaw 实例
+### 场景 1: 新用户自动隔离
 
-**问题：** 多个用户共用一个 OpenClaw 实例，担心隐私泄露
-
-**解决方案：**
-```javascript
-// 安装 multi-user-privacy
-npx clawhub install multi-user-privacy
-
-// 自动生效，无需额外配置
-// 每个用户的对话自动隔离
+```
+用户首次发送消息 → 自动检测 → 创建子代理 → 路由到子代理
 ```
 
-**效果：**
-- ✅ 用户 A 看不到用户 B 的记忆
-- ✅ 用户 A 不知道用户 B 的存在
-- ✅ 完全隔离，互不干扰
+### 场景 2: 配额超限处理
 
----
-
-### 场景 2：企业客服系统
-
-**问题：** 企业需要为不同客户提供专属客服，数据需要完全隔离
-
-**解决方案：**
-```bash
-# 为每个 VIP 客户创建独立 agent
-./scripts/create-vip-agent.sh -u company1 -n "XX 公司" -l platinum
+```
+用户请求 → 配额检查 → 超限拒绝 → 记录日志 → 发送告警
 ```
 
-**效果：**
-- ✅ 每个客户独立 agent
-- ✅ 完全数据隔离
-- ✅ 专属配置
+### 场景 3: Session 自动扩缩容
 
----
-
-### 场景 3：SaaS 服务提供商
-
-**问题：** 为多个租户提供 AI 服务，需要租户数据隔离
-
-**解决方案：**
-```bash
-# 使用技能层隔离（免费版）
-# 支持无限租户
-# 每个租户独立记忆空间
+```
+监控负载 → 负载高 (≥0.8) → 创建新 Session
+监控负载 → 负载低 (≤0.3) → 合并 Session
 ```
 
-**效果：**
-- ✅ 租户数据完全隔离
-- ✅ 共享资源，成本低
-- ✅ 支持大规模部署
+### 场景 4: Web 管理
 
----
-
-## 📊 性能对比
-
-| 功能 | 无隔离 | 技能层隔离 | 平台级隔离 |
-|------|-------|-----------|-----------|
-| 隔离级别 | ❌ 无 | ⭐⭐⭐⭐ 高 | ⭐⭐⭐⭐⭐ 完全 |
-| 资源消耗 | 低 | 低 | 高 |
-| 管理成本 | 低 | 低 | 高 |
-| 适用场景 | 个人 | 多用户 | VIP/企业 |
-| 推荐指数 | ⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
-
----
-
-## 🛠️ 命令行工具
-
-### session-guard.js
-
-管理用户 Session
-
-```bash
-# 查看 Session 统计
-node scripts/session-guard.js stats
-
-# 清空 Session 数据库
-node scripts/session-guard.js clear
 ```
-
-### subagent-router.js
-
-管理子代理路由
-
-```bash
-# 查看所有用户子代理
-node scripts/subagent-router.js list
-
-# 删除用户子代理
-node scripts/subagent-router.js remove <user_id>
-
-# 清空路由器数据库
-node scripts/subagent-router.js clear
-```
-
-### view-logs.js
-
-查看日志
-
-```bash
-# 查看最近 10 条
-node scripts/view-logs.js
-
-# 查看最近 50 条
-node scripts/view-logs.js 50
-
-# 只看失败的
-node scripts/view-logs.js --failures
-```
-
-### create-vip-agent.sh
-
-创建 VIP Agent
-
-```bash
-# 创建 VIP agent
-./scripts/create-vip-agent.sh -u laoliu -n "老刘" -c feishu -l platinum
+访问 Web 界面 → 查看状态 → 调整配额 → 实时生效
 ```
 
 ---
 
-## 🔧 故障排查
+## ❓ 常见问题
 
-### 问题 1：Session 不匹配警告
+### Q1: 如何添加新的敏感词？
 
-**现象：**
-```
-[SessionGuard] ⚠️ 检测到非管理员用户，请确保 session 隔离正确
-```
-
-**解决方案：**
 ```bash
-# 查看 Session 统计
-node scripts/session-guard.js stats
-
-# 清空 Session 数据库
-node scripts/session-guard.js clear
+node sensitive-word-loader.js add keyword "敏感词" block "说明"
 ```
 
-### 问题 2：记忆文件无法访问
+### Q2: 如何查看当前活跃子代理？
 
-**现象：**
-```
-[PrivacyGuard] 普通用户无法访问 MEMORY.md
-```
-
-**解决方案：**
-- 这是正常行为，普通用户本就不应该访问 MEMORY.md
-- 如需访问，请将该用户添加到管理员列表
-
-### 问题 3：子代理创建失败
-
-**现象：**
-```
-Error: thread=true is unavailable
+```bash
+cd web-admin
+node server.js
+# 访问 http://localhost:3456 查看
 ```
 
-**解决方案：**
-- 这是平台限制，使用技能层隔离即可
-- 技能层隔离已经足够安全
+### Q3: 如何调整用户配额？
+
+```bash
+node scripts/quota-manager.js set ou_xxx --disk=100 --token=100000
+```
+
+### Q4: 监控告警如何配置？
+
+编辑 `monitoring/alert-config.json`，然后重启监控：
+```bash
+cd monitoring
+./start.sh stop
+./start.sh start
+```
+
+### Q5: Session 持久化在哪里？
+
+自动启用，无需配置。Session 状态保存在：
+- `memory/session-state.json`
+- `memory/sessions/{id}/`
+
+---
+
+## 📈 版本历史
+
+### v0.9.0 (2026-03-12)
+- ✅ 敏感词词库独立配置
+- ✅ Gateway 自动创建子代理
+- ✅ 配额管理启用
+- ✅ 监控告警系统
+- ✅ Web 管理界面
+- ✅ Session 持久化
+- ✅ Session 模板
+- ✅ 高级配额管理
+- ✅ 自动扩缩容
+
+### v0.8.2 (2026-03-11)
+- ✅ 多用户隐私隔离
+- ✅ 子代理手动创建
+- ✅ 记忆复制
 
 ---
 
@@ -299,56 +450,23 @@ Error: thread=true is unavailable
 
 欢迎提交 Issue 和 Pull Request！
 
-### 开发环境设置
-
-```bash
-# 克隆项目
-git clone https://github.com/your-username/multi-user-privacy.git
-cd multi-user-privacy
-
-# 安装依赖
-npm install
-
-# 运行测试
-npm test
-```
-
-### 提交指南
-
-1. Fork 项目
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启 Pull Request
+**GitHub**: https://github.com/lz84/multi-user-privacy
 
 ---
 
 ## 📄 许可证
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
-
----
-
-## 🙏 致谢
-
-- [OpenClaw](https://openclaw.ai) - 强大的 AI 助手框架
-- [ClawHub](https://clawhub.com) - 技能市场
-- 所有贡献者
+MIT License
 
 ---
 
 ## 📞 联系方式
 
-- **项目地址**: https://github.com/your-username/multi-user-privacy
-- **问题反馈**: https://github.com/your-username/multi-user-privacy/issues
-- **文档**: https://github.com/your-username/multi-user-privacy/tree/main/docs
+- **作者**: 狗子 🐶
+- **GitHub**: https://github.com/lz84/multi-user-privacy
+- **问题反馈**: GitHub Issues
 
 ---
 
-<div align="center">
-
-**Made with ❤️ by 狗子 🐶**
-
-如果这个项目对你有帮助，请给一个 ⭐️ Star！
-
-</div>
+**最后更新**: 2026-03-12 12:53  
+**版本**: v0.9.0

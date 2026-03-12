@@ -1,0 +1,21 @@
+[Unit]
+Description=OpenClaw Monitoring Service
+After=network.target openclaw-gateway.service
+
+[Service]
+Type=simple
+User=%i
+WorkingDirectory=/home/user/.openclaw/workspace/monitoring
+ExecStart=/usr/bin/node /home/user/.openclaw/workspace/monitoring/monitor.js start
+Restart=always
+RestartSec=10
+Environment=HOME=/home/user
+Environment=NODE_ENV=production
+
+# 日志
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=openclaw-monitor
+
+[Install]
+WantedBy=multi-user.target

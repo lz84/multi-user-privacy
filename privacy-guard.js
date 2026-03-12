@@ -12,6 +12,10 @@
 
 const fs = require('fs');
 const path = require('path');
+const { SensitiveWordLoader } = require('./sensitive-word-loader');
+
+// 初始化敏感词加载器
+const sensitiveWordLoader = new SensitiveWordLoader();
 
 // 配置文件路径
 const CONFIG_PATH = path.join(process.env.HOME, '.openclaw/workspace/.user-context.json');
@@ -31,11 +35,7 @@ const BEHAVIOR_CONFIG = {
   timeWindowMs: 1800000,          // 时间窗口（30 分钟）
   banDurationMs: 1800000,         // 封禁时长（30 分钟）
   alertThreshold: 3,              // 告警阈值
-  suspiciousPatterns: [
-    /ou_[a-f0-9]{32}/g,          // 尝试访问其他账号 ID
-    /MEMORY\.md/i,                // 尝试访问管理员记忆
-    /users\/[^/]+\.md/i          // 尝试访问其他用户记忆
-  ]
+  // 敏感词检测已移至 sensitive-words.txt 文件
 };
 
 // 项目配置文件路径
@@ -65,20 +65,37 @@ function checkMessage(message, currentUserId) {
   const config = loadUserContext();
   const issues = [];
 
-  // 1. 检查是否包含账号 ID 格式 (ou_xxx)
-  const idPattern = /ou_[a-f0-9]{32}/g;
-  const foundIds = message.match(idPattern) || [];
-  
-  foundIds.forEach(id => {
-    if (id !== currentUserId) {
+  // 1. 敏感词检查（使用词库）
+  const sensitiveResult = sensitiveWordLoader.check(message);
+  if (!sensitiveResult.passed) {
+    sensitiveResult.violations.forEach(violation => {
       issues.push({
-        type: 'account_id_leak',
-        value: id,
-        severity: 'high',
-        message: `检测到其他账号 ID: ${id}`
+        type: 'sensitive_word',
+        value: violation.pattern,
+        severity: violation.severity,
+        message: violation.description,
+        action: violation.action
       });
-    }
-  });
+    });
+  }
+
+  // 2. 检查是否包含账号 ID 格式 (ou_xxx) - 如果词库中没有配置
+  const hasAccountIdRule = sensitiveResult.violations.some(v => v.description.includes('账号 ID'));
+  if (!hasAccountIdRule) {
+    const idPattern = /ou_[a-f0-9]{32}/g;
+    const foundIds = message.match(idPattern) || [];
+    
+    foundIds.forEach(id => {
+      if (id !== currentUserId) {
+        issues.push({
+          type: 'account_id_leak',
+          value: id,
+          severity: 'high',
+          message: `检测到其他账号 ID: ${id}`
+        });
+      }
+    });
+  }
 
   // 2. 检查是否提及其他已知用户
   if (config.knownUsers && config.knownUsers.length > 0) {
@@ -842,6 +859,87 @@ if (process.argv[2] === 'test') {
   console.log('\n✅ 所有测试完成！\n');
 }
 
+/**
+ * ==========================================
+ * v0.9.0 新增：子代理自动创建集成
+ * ==========================================
+ */
+
+const gatewayHook = require('./gateway-hook');
+
+/**
+ * 处理用户消息并自动创建子代理
+ * @param {object} context - 消息上下文
+ * @param {string} message - 消息内容
+ * @returns {object} 处理结果
+ */
+function handleUserMessage(context, message = '') {
+  const userId = getUserIdFromContext(context);
+  
+  if (!userId) {
+    console.error('[PrivacyGuard] 无法识别用户 ID');
+    return {
+      status: 'ERROR',
+      error: '无法识别用户'
+    };
+  }
+  
+  // 1. 执行隐私检查
+  const privacyCheck = preCheck(context);
+  
+  if (privacyCheck.status !== 'PASS') {
+    return privacyCheck;
+  }
+  
+  // 2. 获取或创建子代理
+  const userName = context.user_name || context.sender_name || '用户';
+  const sessionResult = gatewayHook.handleMessage(message, userId, userName);
+  
+  // 3. 记录日志
+  logCheck(userId, 'MESSAGE_HANDLED', {
+    message: message.substring(0, 100),
+    sessionKey: sessionResult.sessionKey,
+    routed: sessionResult.routed,
+    pending: sessionResult.pending
+  });
+  
+  return {
+    status: 'SUCCESS',
+    userId,
+    userName,
+    sessionKey: sessionResult.sessionKey,
+    routed: sessionResult.routed,
+    pending: sessionResult.pending,
+    memoryPath: sessionResult.memoryPath,
+    privacyCheck
+  };
+}
+
+/**
+ * 获取用户会话信息
+ * @param {string} userId - 用户 ID
+ * @returns {object|null} 会话信息
+ */
+function getUserSessionInfo(userId) {
+  return gatewayHook.getUserSession(userId);
+}
+
+/**
+ * 列出所有用户会话
+ * @returns {object} 会话统计
+ */
+function listAllUserSessions() {
+  return gatewayHook.listAllSessions();
+}
+
+/**
+ * 处理 pending 队列
+ * @returns {array} 创建的会话列表
+ */
+function processPendingSubAgents() {
+  return gatewayHook.processPendingQueue();
+}
+
 // 导出
 module.exports = {
   // 原有功能
@@ -876,6 +974,12 @@ module.exports = {
   
   // v0.6.0 新增（Session 管理）
   checkSession,
+  
+  // v0.9.0 新增（子代理自动创建）
+  handleUserMessage,
+  getUserSessionInfo,
+  listAllUserSessions,
+  processPendingSubAgents,
   
   // 常量
   ADMIN_ID
